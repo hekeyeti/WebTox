@@ -54,6 +54,11 @@ go:
 			return nil
 		}
 
+使用:
+	cd Webtox
+	go run src/main.go -u <http_auth_user> -p <http_auth_passwd>
+	http://<your webtox server ip>:6655/
+
 
 
 
