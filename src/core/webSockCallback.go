@@ -88,8 +88,15 @@ func wsUpdateSelfInfo(conn *websocket.Conn , recvMap map2sk ){
     StatusMessage :=rjson[`StatusMessage`]
 
     t.SelfSetStatus( uint8(int(ToxStatus.(float64))) )
-    t.SelfSetName(Nickname.(string))
-    t.SelfSetStatusMessage(StatusMessage.(string))
+    name , ok := Nickname.(string)
+    if ok{
+      t.SelfSetName(name)
+    }
+    
+    smsg , ok := StatusMessage.(string)
+    if ok{
+      t.SelfSetStatusMessage(smsg)
+    }
 
     err := t.WriteSavedata(tox_save_file)
     if err != nil{
