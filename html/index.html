@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License
   along with WebTox.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<html lang="en" ng-app="webtox" ng-controller="webtoxCtrl" class="ng-cloak">
+<html >
 
 <head>
   <title>WebTox</title>
@@ -28,97 +28,110 @@
   <link rel="shortcut icon" href="img/favicon.png">
   <link rel="shortcut icon" href="img/favicon.ico">
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="lib/app.css">
 </head>
 
 <body>
-
+  
   <!-- Sidebar -->
   <div id="profile-card">
     <div id="profile-card-status-dropdown" class="dropdown">
-      <button href="#" class="btn dropdown-toggle" data-toggle="dropdown" id="profile-card-status-button">
-        <img ng-show="profile.status == 'NONE'" src="img/toxui/dot_online.png" alt="Online">
-        <img ng-show="profile.status == 'AWAY'" src="img/toxui/dot_away.png" alt="Away">
-        <img ng-show="profile.status == 'BUSY'" src="img/toxui/dot_busy.png" alt="Busy">
-        <!--<img ng-show="profile.status == 'INVI'" src="img/toxui/dot_invisible.png" alt="Invisible">-->
-      </button>
 
-      <ul class="dropdown-menu dropdown-menu-right">
-        <li>
-          <a href="#" ng-click="setUserStatus('NONE')">
-            <img src="img/toxui/dot_online.png">&emsp;
-            <span translate>Online</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" ng-click="setUserStatus('AWAY')">
-            <img src="img/toxui/dot_away.png">&emsp;
-            <span translate>Away</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" ng-click="setUserStatus('BUSY')">
-            <img src="img/toxui/dot_busy.png">&emsp;
-            <span translate>Busy</span>
-          </a>
-        </li>
-        <!--<li><a href="#" ng-click=""><img src="img/toxui/dot_invisible.png">&emsp;<span translate>Invisible</span></a></li>-->
-        <li class="divider"></li>
-        <li>
-          <a data-toggle="modal" href="#modal-toxid">
-            <span class="glyphicon glyphicon-user"></span>&emsp;
-            <span translate>Show ID</span>
-          </a>
-        </li>
-        <li>
-          <a ng-click="goFullscreen()" href="#">
-            <span class="glyphicon glyphicon-fullscreen"></span>&emsp;
-            <span translate>Fullscreen</span>
-          </a>
-        </li>
-        <li>
-          <a ng-click="showSettings()" href="#">
-            <span class="glyphicon glyphicon-cog"></span>&emsp;
-            <span translate>Settings</span>
-          </a>
-        </li>
-        <li>
-          <a data-toggle="modal" href="#modal-about">
-            <span class="glyphicon glyphicon-leaf"></span>&emsp;
-            <span translate>About</span>
-          </a>
-        </li>
-      </ul>
-    </div>
+          <!--   显示自身状态 -->
+          <button v-if="ConnectStatus > 0" href="#" class="btn dropdown-toggle" data-toggle="dropdown" id="profile-card-status-button">
+            <img v-if="ToxStatus == 0" src="img/toxui/dot_online.png" alt="Online">
+            <img v-if="ToxStatus == 1" src="img/toxui/dot_away.png" alt="Away">
+            <img v-if="ToxStatus == 2" src="img/toxui/dot_busy.png" alt="Busy">
+            <!--<img  src="img/toxui/dot_invisible.png" alt="Invisible">-->
+          </button>
+
+
+          <ul class="dropdown-menu dropdown-menu-right">
+            
+            <!-- 设置自身状态 -->
+            <li v-on:click="set_status(0)">
+              <a href="#">
+                <img src="img/toxui/dot_online.png">&emsp;
+                <span translate>Online</span>
+              </a>
+
+
+            </li>
+            <li v-on:click="set_status(1)">
+              <a href="#"  >
+                <img src="img/toxui/dot_away.png">&emsp;
+                <span translate>Away</span>
+              </a>
+            </li>
+
+
+            <li v-on:click="set_status(2)">
+              <a href="#" >
+                <img src="img/toxui/dot_busy.png">&emsp;
+                <span translate>Busy</span>
+              </a>
+            </li>
+
+
+            <!--<li><a href="#" ng-click=""><img src="img/toxui/dot_invisible.png">&emsp;<span translate>Invisible</span></a></li>-->
+            <li class="divider"></li>
+            
+            <!-- 显示TOX状态弹窗 -->
+            <li>
+              <a data-toggle="modal" href="#modal-toxid">
+                <span class="glyphicon glyphicon-user"></span>&emsp;
+                <span translate>显示ToxID</span>
+              </a>
+            </li>
+
+
+            <!-- 显示关于弹窗 -->
+            <li>
+              <a data-toggle="modal" href="#modal-about">
+                <span class="glyphicon glyphicon-leaf"></span>&emsp;
+                <span translate>关于</span>
+              </a>
+            </li>
+
+          </ul>
+        </div>
+
+      
 
     <img id="profile-card-picture" src="img/toxui/blankavatar.png" alt="Profile picture" class="avatar">
-    <input type="text" id="profile-card-username" ng-model="profile.username" ng-blur="setUsername(profile.username)">
-    <input type="text" id="profile-card-status-msg" ng-model="profile.status_msg" ng-blur="setStatusMsg(profile.status_msg)">
+    <!-- 配置TOX昵称 -->
+    <input type="text" id="profile-card-username"   v-model="Nickname"  v-on:change="tox_self_change" >
+    <!-- 配置TOX签名 -->
+    <input type="text" id="profile-card-status-msg"  v-model="StatusMessage" v-on:change="tox_self_change" >
   </div>
 
+  <!-- 联系人列表 -->
   <div id="contact-list-wrapper">
     <div id="contact-list">
-      <select id="contact-list-status-select" ng-model="onlyShowOnlineContacts">
+      <select id="contact-list-status-select" >
         <option value="">All</option>
         <option value="1">Online</option>
       </select>
-      <button class="btn btn-toxgreen inline-button" ng-show="friendRequests.length == 1" data-toggle="modal" href="#modal-friend-requests">1 Friend Request</button>
-      <button class="btn btn-toxgreen inline-button" ng-show="friendRequests.length >= 2" data-toggle="modal" href="#modal-friend-requests">{{ friendRequests.length }} Friend Requests</button>
-      <button class="btn btn-toxgreen inline-button" href="#" ng-show="appInstallationStatus == 'notinstalled'" ng-click="installWebApp()">install</button>
-      <button class="btn btn-toxgreen inline-button disabled" href="#" ng-show="appInstallationStatus == 'success'" ng-click="installWebApp()">installed</button>
-      <a href="#" class="contact" ng-class="{active: contacts[activecontactindex] == contact}" ng-repeat="contact in contacts | orderBy:'online':true" ng-click="showChat(contact.number); scrollLeft();" ng-show="!onlyShowOnlineContacts || contact.online">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'NONE' && (contact.chat.length == 0 || contact.last_msg_read >= contact.chat[0].time)" alt="Online"  src="img/toxui/dot_online.png">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'NONE' && contact.last_msg_read < contact.chat[0].time"                                alt="Online"  src="img/toxui/dot_online_notification.png">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'AWAY' && (contact.chat.length == 0 || contact.last_msg_read >= contact.chat[0].time)" alt="Away"    src="img/toxui/dot_away.png">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'AWAY' && contact.last_msg_read < contact.chat[0].time"                                alt="Away"    src="img/toxui/dot_away_notification.png">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'BUSY' && (contact.chat.length == 0 || contact.last_msg_read >= contact.chat[0].time)" alt="Busy"    src="img/toxui/dot_busy.png">
-        <img class="contact-status-icon" ng-show="contact.online && contact.status == 'BUSY' && contact.last_msg_read < contact.chat[0].time"                                alt="Busy"    src="img/toxui/dot_busy_notification.png">
-        <img class="contact-status-icon" ng-show="!contact.online && (contact.chat.length == 0 || contact.last_msg_read >= contact.chat[0].time)"                            alt="Offline" src="img/toxui/dot_offline.png">
-        <img class="contact-status-icon" ng-show="!contact.online && contact.last_msg_read < contact.chat[0].time"                                                           alt="Offline" src="img/toxui/dot_offline_notification.png">
-        <img class="contact-avatar avatar" ng-src="avatars/{{contact.publicKey}}.png?{{curDate}}" onerror="this.src = 'img/toxui/blankavatar.png';" alt="avatar">
-        <div class="contact-name">{{contact.name.length ? contact.name : "[Name not set]"}}</div>
-        <div class="contact-status-msg">{{contact.status_msg.length ? contact.status_msg : '&nbsp;'}}</div>
-      </a>
+      <button class="btn btn-toxgreen inline-button" v-if="isFriendRequests == true"  data-toggle="modal" href="#modal-friend-requests">有新的好友请求</button>
+
+
+          <a href="#" class="contact" v-for="friend in friends" v-on:click="select_chat(friend.FriendNumber)"  >
+              <div v-if="friend.IsOnline > 0">
+                <img class="contact-status-icon"  alt="Online" v-if="friend.ToxStatus == 0 "  src="img/toxui/dot_online.png">
+                <img class="contact-status-icon"  alt="Away"  v-if="friend.ToxStatus == 1 "   src="img/toxui/dot_away.png">
+                <img class="contact-status-icon"  alt="Busy"  v-if="friend.ToxStatus == 2 "   src="img/toxui/dot_busy.png">
+              </div>
+               <img class="contact-status-icon"   alt="Offline" v-if="friend.IsOnline == 0 " src="img/toxui/dot_offline.png">
+              <img class="contact-avatar avatar"  src="img/toxui/blankavatar.png"  alt="avatar">
+           
+            <div class="contact-name">
+              {{  friend.Nickname }}
+            </div>
+            <div class="contact-status-msg">
+              {{  friend.StatusMessage }}
+            </div>
+          </a>
+
     </div>
   </div>
 
@@ -126,13 +139,13 @@
     <button data-toggle="modal" href="#modal-friend-requests" title="Add contact">
       <img src="img/toxui/add.png" alt="Add contact">
     </button>
-    <button ng-click="notImplemented()" title="New group chat">
+    <button  title="New group chat">
       <img src="img/toxui/group.png" alt="New group chat">
     </button>
-    <button ng-click="notImplemented()" title="File transfer">
+    <button  title="File transfer">
       <img src="img/toxui/transfer.png" alt="File transfer">
     </button>
-    <button ng-click="showSettings()" title="Settings">
+    <button data-toggle="modal"  title="Settings" href="#modal-setting" v-on:click="setting()">
       <img src="img/toxui/settings.png" alt="Settings">
     </button>
   </div>
@@ -140,55 +153,51 @@
 
   <!-- Main View -->
   <div id="mainview">
-    <!-- Welcome -->
-    <div id="mainview-welcome" ng-show="active_mainview === 'welcome'">
-      <h1>WebTox</h1>
-      <p>
-        <strong style="color: #c84e4e;">WebTox is not ready yet. Do not use it unless you know what you do.</strong>
-      </p>
-      <p>With the rise of government monitoring programs, Tox provides an easy to use application that allows you to connect with friends and family without anyone else listening in. While other big-name services require you to pay for features, Tox is totally
-        free, and comes without advertising.</p>
-      <p>Nowadays, every government seems to be interested in what we're saying online. Tox is built on a "privacy goes first" agenda, and we make no compromises. Your safety is our top priority, and there isn't anything in the world that will change that.</p>
-      <p>Proof: 1 + 2 = {{ 1 + 2 }}</p>
-    </div>
+    
 
     <!-- Chat -->
-    <div id="mainview-chat" ng-show="active_mainview === 'chat'">
+    <div id="mainview-chat" v-if="chat.isShow == true" >
       <div id="mainview-chat-header">
         <button class="chat-header-button btn btn-toxred pull-right" data-toggle="modal" href="#modal-friend-del">
           <img src="img/toxui/no.png" alt="Unfriend">
         </button>
-        <button class="chat-header-button btn btn-toxgreen pull-right">
+       
+        <!-- <button class="chat-header-button btn btn-toxgreen pull-right">
           <img src="img/toxui/video.png" alt="Video Call">
         </button>
         <button class="chat-header-button btn btn-toxgreen pull-right">
           <img src="img/toxui/call.png" alt="Call">
-        </button>
+        </button> -->
         <div id="profile-card-back-button" class="btn btn-toxgreen">&lt;</div>
         <img src="img/toxui/blankavatar.png" alt="avatar" class="avatar">
-        <div id="mainview-chat-header-username">{{contacts[activecontactindex].name}}</div>
-        <div id="mainview-chat-header-status-msg">{{contacts[activecontactindex].status_msg}}</div>
+        <div id="mainview-chat-header-username">{{ contacts.friends[chat.friendNumber].Nickname }}</div>
+        <div id="mainview-chat-header-status-msg">{{ contacts.friends[chat.friendNumber].StatusMessage }}</div>
       </div>
       <div id="mainview-chat-body">
-        <div ng-repeat="chat in contacts[activecontactindex].chat.slice().reverse()" ng-class="{messageself: !chat.isIncoming}">
-          <span class="chatname" ng-if="!chat.isIncoming">{{profile.username}}</span>
-          <span class="chatname" ng-if="chat.isIncoming">{{contacts[activecontactindex].name}}</span>
-          <span class="chatmsg">{{chat.message}}</span>
-          <span class="timestamp">{{chat.time | date : 'H:mm:ss'}}</span>
+       
+        <div v-for="msg in contacts.friends[chat.friendNumber].message">
+          <span class="chatname" v-if="msg.IsIncoming == 1" >{{ contacts.friends[chat.friendNumber].Nickname }}</span>
+          <span class="chatname" v-if="msg.IsIncoming == 0" >{{ self.Nickname }}</span>
+          <span class="chatmsg">{{ msg.Message }}</span>
+          <span class="timestamp">{{  new Date(parseInt(msg.Time) ).toLocaleString() }}</span>
         </div>
+
+
+       
+
       </div>
       <div id="mainview-chat-footer">
         <div id="mainview-chat-footer-textarea-wrapper">
-          <textarea ng-model="messagetosend"></textarea>
+          <textarea  v-model="chat.SendMessage"></textarea>
         </div>
         <div id="mainview-chat-footer-buttons-wrapper">
-          <button id="mainview-chat-footer-button-send" class="btn btn-toxgreen" ng-click="sendMessage()">
-            <img src="img/toxui/sendmessage.png" alt="Send">
+          <button id="mainview-chat-footer-button-send" class="btn btn-toxgreen" v-on:click="send_friend_messge()">
+            <img src="img/toxui/sendmessage.png" alt="发送">
           </button>
-          <button id="mainview-chat-footer-button-emoticon" class="btn btn-toxgreen" ng-click="notImplemented()">
+          <button id="mainview-chat-footer-button-emoticon" class="btn btn-toxgreen" >
             <img src="img/toxui/emoticon.png" alt=":-)">
           </button>
-          <button id="mainview-chat-footer-button-attach" class="btn btn-toxgreen" ng-click="notImplemented()">
+          <button id="mainview-chat-footer-button-attach" class="btn btn-toxgreen" >
             <img src="img/toxui/attach.png" alt="#">
           </button>
         </div>
@@ -196,86 +205,32 @@
     </div>
 
     <!-- Settings -->
-    <div id="mainview-settings" ng-show="active_mainview === 'settings'">
-      <h1>Settings</h1>
-      <hr>
-      <h4>Your Tox ID</h4>
-      <p>This is your Tox ID that you can give out to your friends.</p>
-      <div class="well well-sm well-toxid text-monospace text-center">{{profile.tox_id}}</div>
-      <hr>
-      <h4>GUI Authentication Username/Password</h4>
-      <div class="form-horizontal">
-        <div class="form-group">
-          <label for="inputAuthUser" class="col-sm-3 control-label">GUI Authentication User</label>
-          <div class="col-sm-3">
-            <input type="text" id="inputAuthUser" class="form-control input-sm" ng-model="settings.auth_user" value="" placeholder="User">
-          </div>
-          <div class="col-sm-1">
-            <button class="btn btn-sm btn-default initiallyhidden">Save</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="inputAuthPass" class="col-sm-3 control-label">GUI Authentication Password</label>
-          <div class="col-sm-3">
-            <input type="password" id="inputAuthPass" class="form-control input-sm" ng-model="settings.auth_password" value="" placeholder="Password">
-          </div>
-          <div class="col-sm-1">
-            <button class="btn btn-sm btn-default initiallyhidden">Save</button>
-          </div>
-        </div>
-      </div>
-      <hr>
-
-      <h4>General</h4>
-      <div class="form-horizontal">
-        <div class="form-group">
-          <div class="col-sm-offset-3 col-sm-3">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" id="checkbox-notifications" ng-model="settings.notifications_enabled"> Show notifications</label>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="col-sm-offset-3 col-sm-3">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" id="checkbox-away-on-disconnect" ng-model="settings.away_on_disconnect"> Change status to <i>away</i> when the last webclient disconnects</label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <hr>
-
-      <h4>Server</h4>
-      <div class="form-horizontal">
-        <div class="form-group">
-          <label for="inputAuthUser" class="col-sm-3 control-label">GUI Listen Address</label>
-          <div class="col-sm-3">
-            <input type="text" class="form-control input-sm" placeholder="127.0.0.1:8080">
-            <p class="help-block">Use 0.0.0.0 for external access</p>
-          </div>
-        </div>
-      </div>
+    <div id="setting" v-if="chat.isShow == false"  >
+        <h1>这并没啥用呢</h1>
+        <hr>
+        <h4>WebToxID</h4>
+        <div class="well well-sm well-toxid text-monospace text-center">{{ self.Toxid }}</div>
+        <hr>
     </div>
+  
   </div>
   <!-- END OF Main View -->
 
-  <!-- Tox ID modal -->
+   <!-- Tox ID modal -->
   <div class="modal info fade" id="modal-toxid" tabindex="-1" role="dialog" aria-labelledby="modal-toxid-title" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="modal-toxid-title">Your Tox ID</h4>
+          <h4 class="modal-title" id="modal-toxid-title">当前 Tox ID</h4>
         </div>
         <div class="modal-body">
-          <div class="well well-sm well-toxid text-monospace text-center">{{profile.tox_id}}</div>
-          <p>This is your Tox ID that you can give out to your friends.</p>
+          <div class="well well-sm well-toxid text-monospace text-center">{{ Toxid }}</div>
+          <p>你的Webtox ID，让其它人加这玩意就好了</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">
             <span class="glyphicon glyphicon-remove"></span>
-            <span>Close</span>
+            <span>关闭</span>
           </button>
         </div>
       </div>
@@ -290,37 +245,48 @@
           <h4 class="modal-title" id="modal-friend-requests-title">Friend requests</h4>
         </div>
         <div class="modal-body">
-          <h3>Send a friend request</h3>
-          <form role="form" action="#" ng-submit="sendFriendRequest(new_friend_request.friend_id, new_friend_request.message)">
+          <h3>发送好友请求</h3>
+          <form role="form" action="#" >
             <div class="form-group input-group">
-              <span class="input-group-addon">Tox ID</span>
-              <input type="text" class="form-control" ng-model="new_friend_request.friend_id" placeholder="Please enter your friends Tox ID.">
+              <span class="input-group-addon">对方的Tox ID</span>
+              <input type="text" class="form-control"  placeholder="Please enter your friends Tox ID." v-model="reqfriendToxID" > 
             </div>
             <div class="form-group">
-              <textarea class="form-control" rows="3" ng-model="new_friend_request.message">Hey! Please let me add you to my contact list.</textarea>
+              <textarea class="form-control" rows="3" v-model="reqfriendStatusMesage" >输入验证信息</textarea>
             </div>
             <div class="form-group clearfix">
-              <input type="submit" class="btn btn-toxgreen pull-right">
+              <button  class="btn btn-toxgreen pull-right" v-on:click="addFriend()" >发送请求</button>
             </div>
           </form>
-          <hr>
-          <h3>Incoming friend requests</h3>
-          <div class="panel panel-default friend-request" ng-repeat="friendRequest in friendRequests">
-            <div class="panel-heading" ng-click="toggleFriendRequestBody()">{{friendRequest.publicKey|uppercase}}</div>
-            <div class="panel-body" ng-show="!friendRequest.is_ignored">
-              <div style="white-space: pre;">{{friendRequest.message}}</div>
-              <div class="text-right">
-                <button class="btn btn-sm" ng-click="ignoreFriendRequest()">Ignore</button>
-                <button class="btn btn-sm btn-toxgreen" ng-click="acceptFriendRequest()">Accept</button>
+          
+          
+            <hr>
+            <div v-show="isFriendRequests == true">
+              <h3>未处理的好友请求</h3>
+              
+              <div class="panel panel-default friend-request" v-for="friendRequest in friendRequests" >
+                <div class="panel-heading" >ToxID:{{ friendRequest.FriendId }}</div>
+                <div class="panel-body" >
+                  <div style="white-space: pre;">验证信息:{{friendRequest.Message}}</div>
+                  <div class="text-right">
+                    <button class="btn btn-sm" v-on:click="reject(friendRequest.FriendId)" >拒接</button>
+                    <button class="btn btn-sm btn-toxgreen" v-on:click="accept(friendRequest.FriendId)" >接受</button>
+                  </div>
+                </div>
               </div>
+
             </div>
-          </div>
-          <p ng-show="friendRequests.length == 0">No outstanding friend requests.</p>
+            <p v-show="isFriendRequests == false">没有好友请求</p>
+        
+
+
         </div>
+
+
         <div class="modal-footer">
           <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">
             <span class="glyphicon glyphicon-remove"></span>
-            <span>Close</span>
+            <span>关闭</span>
           </button>
         </div>
       </div>
@@ -329,22 +295,28 @@
 
   <!-- Delete friend modal -->
   <div class="modal warning fade" id="modal-friend-del" tabindex="-1" role="dialog" aria-labelledby="modal-friend-del-title" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg" v-if="chat.isShow == true">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="modal-friend-del-title">Remove friend?</h4>
+          <h4 class="modal-title" id="modal-friend-del-title">你确定要删除好友?</h4>
         </div>
         <div class="modal-body">
-          <p>Do you really want to delete this contact?</p>
+          <p>当前好友:{{ contacts.friends[chat.friendNumber].Nickname }}</p>
+          <p>ToxID:{{ contacts.friends[chat.friendNumber].FriendId }}</p>
+          <p>请注意，这会把好友连同历史消息一块删除!</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default btn-sm" ng-click="deleteFriend(contacts[activecontactindex].number)">
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" v-on:click="delFriend()" >
             <span class="glyphicon glyphicon-ok"></span>
-            <span>Yes</span>
+            <span>删除好友</span>
+          </button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" v-on:click="delFriend()" >
+            <span class="glyphicon glyphicon-ok"></span>
+            <span>清除历史消息</span>
           </button>
           <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">
             <span class="glyphicon glyphicon-remove"></span>
-            <span>No</span>
+            <span>关闭</span>
           </button>
         </div>
       </div>
@@ -366,16 +338,13 @@
             <small>0.0.1</small>
           </h1>
           <hr/>
-          <p translate>Copyright &copy; 2014 WebTox authors and contributors</p>
-          <p translate>WebTox includes the following software or portions thereof:</p>
+          <p translate>下面是引用其它人的项目列表</p>
           <ul>
-            <li><a href="https://github.com/irungentoo/toxcore">irungentoo/toxcore</a>, Copyright &copy; 2013 Tox project.</li>
-            <li><a href="https://github.com/codedust/go-tox">codedust/go-tox</a>, Copyright &copy; 2015 The gotox authors.</li>
+            <li><a href="https://github.com/codedust">codedust</a>, Copyright &copy; 2015 The gotox authors.</li>
             <li><a href="https://github.com/ItsDuke/Tox-UI">ItsDuke/Tox-UI</a>, Copyright &copy; 2014 The Tox-UI authors.</li>
             <li><a href="http://golang.org/">The Go Programming Language</a>, Copyright &copy; 2012 The Go authors.</li>
-            <li><a href="http://www.gorillatoolkit.org/">gorilla/websocket</a>, Copyright &copy; 2013 The Gorilla WebSocket authors.</li>
             <li><a href="https://jquery.com/">jQuery</a>, Copyright &copy; 2005-2014 jQuery Foundation, Inc.</li>
-            <li><a href="https://angularjs.org/">AngularJS</a>, Copyright &copy; 2010-2014 Google, Inc.</li>
+            <li><a href="https://cn.vuejs.org/">VueJS</a>个人觉得比React好用</li>
             <li><a href="http://getbootstrap.com/">Bootstrap</a>, Copyright &copy; 2011-2014 Twitter, Inc.</li>
             <li><a href="http://www.google.com/fonts/specimen/Roboto">The Roboto Font</a>, Copyright &copy; 2012 Google, Inc.</li>
           </ul>
@@ -395,23 +364,27 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="modal-connection-error-title">Connection error</h4>
+          <h4 class="modal-title" id="modal-connection-error-title">当前页面无效!</h4>
         </div>
         <div class="modal-body">
-          <p>WebTox is currently not connected to the server.</p>
+          <p>WebSocket连接中断或者ToxServer被关闭！</p>
+          <p>为了安全起见单个WebToxServer不能同时用多个页面打开!</p>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="angular/angular.min.js"></script>
-  <script src="jquery/jquery-1.11.1.min.js"></script>
+  
+  <script src="lib/jquery-1.11.1.min.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/fullscreen.js"></script>
-  <script src="js/webapp.js"></script>
-  <script src="js/notifications.js"></script>
+  <script src="lib/vue.js"></script>
+
+
+  <script src="js/const.js"></script>
+<!--   <script src="js/view.js"></script> -->
   <script src="js/ws.js"></script>
+  
+  
 </body>
 
 </html>
