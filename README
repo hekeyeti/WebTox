@@ -1,0 +1,74 @@
+
+依赖库
+
+c:
+	https://github.com/TokTok/c-toxcore
+
+go:
+    go get github.com/mattn/go-sqlite3
+	go get github.com/TokTok/go-toxcore-c
+
+
+
+修改:
+	github.com/TokTok/go-toxcore-c中utils.go中
+		func (this *Tox) WriteSavedata(fname string) error 
+		修改成如下
+		func (this *Tox) WriteSavedata(fname string) error {
+			if !FileExist(fname) {
+				err := ioutil.WriteFile(fname, this.GetSavedata(), 0755)
+				if err != nil {
+					return err
+				}
+			} else {
+				data, err := ioutil.ReadFile(fname)
+				if err != nil {
+					return err
+				}
+				liveData := this.GetSavedata()
+				if bytes.Compare(data, liveData) != 0 {
+					tfp, err := ioutil.TempFile(filepath.Dir(fname), "gotcb")
+					if err != nil {
+						return err
+					}
+					if _, err := tfp.Write(liveData); err != nil {
+						return err
+					}
+					tfname := tfp.Name()
+					//fmt.Println("go toxcore bind utils ",tfname)
+					if err := tfp.Close(); err != nil {
+						return err
+					}
+					if err := os.Remove(fname); err != nil {
+						return err
+					}
+					if err := os.Rename(tfname, fname); err != nil {
+						return err
+					}
+					/*if err := os.Rename(filepath.Dir(fname)+"/"+tfname, fname); err != nil {
+						return err
+					}*/
+				}
+			}
+
+			return nil
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
